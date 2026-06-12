@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บันทึกรายรับ-รายจ่าย AI อัจฉริยะ V.8</title>
+    <title>บันทึกรายรับ-รายจ่าย AI อัจฉริยะ V.11</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,7 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
-        /* CSS Variables สำหรับระบบธีมสไตล์ Windows 11 Personalization */
         :root {
             --primary-color: #4e54c8;
             --secondary-color: #8f94fb;
@@ -30,7 +29,6 @@
             --transition-speed: 0.3s;
         }
 
-        /* Dark Mode Theme */
         [data-theme="dark"] {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
@@ -39,7 +37,6 @@
             --border-color: #334155;
         }
 
-        /* 🎬 Motion & Global Animations */
         @keyframes popUp {
             0% { transform: scale(0.9) translateY(10px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
@@ -67,7 +64,6 @@
 
         .container { width: 100%; max-width: 420px; animation: fadeIn 0.5s ease-out; }
 
-        /* 💳 Windows 11 Glassmorphism style cards */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -102,11 +98,19 @@
         .ai-alert { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 8px; border-radius: 8px; margin-top: 8px; font-size: 0.8em; display: none; }
         [data-theme="dark"] .ai-alert { background: #451a03; border: 1px solid #78350f; color: #fef3c7; }
 
-        /* 🔍 Filter & History Panel */
+        /* 💬 Gemini Chat UI */
+        .chat-box { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 5px; }
+        .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; font-size: 0.85em; line-height: 1.4; animation: popUp 0.2s ease; word-break: break-word; }
+        .msg.user { background: var(--primary-color); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.bot { background: var(--border-color); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-input-group { display: flex; gap: 8px; }
+        .chat-input-group input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); font-family: 'Prompt'; font-size: 0.85em; }
+
+        /* 🔍 Filter Box */
         .filter-box { display: flex; gap: 8px; margin-bottom: 12px; }
         .filter-box select, .filter-box input { padding: 8px; font-size: 0.85em; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); }
 
-        /* 📋 Transaction List styling */
+        /* 📋 Transaction List */
         .date-header { font-size: 0.8em; color: var(--text-gray); background: var(--border-color); padding: 4px 10px; border-radius: 6px; margin: 12px 0 6px 0; display: inline-block; font-weight: 600; }
         .list-item {
             list-style: none; background: var(--card-bg); border: 1px solid var(--border-color);
@@ -120,10 +124,8 @@
         .item-icon { width: 38px; height: 38px; background: var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; }
         .item-text { display: flex; flex-direction: column; }
         .item-time { font-size: 0.75em; color: var(--text-gray); }
-        .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; margin-left: 8px; transition: color 0.2s; }
-        .delete-btn:hover { color: var(--expense-color); }
 
-        /* 🎛️ Bottom Floating Sheet & Overlays */
+        /* 🎛️ Bottom Sheet Overlays */
         .open-form-btn {
             position: fixed; bottom: 20px; right: 20px;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -142,12 +144,14 @@
         .form-sheet.open { bottom: 0; animation: slideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        /* 🎨 Personalization Theme Options (Windows 11 style) */
-        .theme-grid { display: flex; gap: 10px; margin: 12px 0; }
-        .theme-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+        /* 🎨 Theme Options */
+        .theme-flex-wrapper { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+        .theme-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; position: relative; }
         .theme-dot.active { border-color: var(--text-main); transform: scale(1.1); }
+        .color-wheel-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); display: flex; align-items: center; justify-content: center; font-size: 0.75em; color: white; text-shadow: 0 1px 2px black; position: relative; overflow: hidden; }
+        .color-wheel-btn input[type="color"] { position: absolute; top:-5px; left:-5px; width: 50px; height: 50px; opacity: 0; cursor: pointer; }
 
-        /* Form Controls */
+        /* Form Control & Input */
         .form-control { margin-bottom: 16px; }
         label { display: block; margin-bottom: 6px; font-size: 0.9em; font-weight: 600; color: var(--text-main); }
         input, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 10px; font-family: 'Prompt'; font-size: 15px; }
@@ -159,21 +163,31 @@
         #type-income:checked + label { background: var(--income-color); color: white; }
         #type-expense:checked + label { background: var(--expense-color); color: white; }
 
-        .btn-main { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-family: 'Prompt'; font-size: 1em; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .btn-main { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-family: 'Prompt'; font-size: 1em; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .btn-main:active { transform: scale(0.98); }
+        .btn-danger { background: #e74c3c !important; color: white; margin-top: 20px; }
         
+        .settings-list { max-height: 160px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 10px; padding: 5px; background: var(--bg-color); margin-bottom: 15px; }
+        .settings-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; font-size: 0.85em; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .settings-list-item:last-child { border-bottom: none; }
+        .sm-delete-btn { background: none; border: none; color: #e74c3c; cursor: pointer; padding: 2px 6px; font-size: 1.1em; }
+
         .slip-scanner-box { background: rgba(78,84,200,0.08); border: 2px dashed var(--secondary-color); padding: 14px; border-radius: 12px; text-align: center; margin-bottom: 16px; color: var(--primary-color); position: relative; cursor: pointer; font-weight: 600; }
         .slip-scanner-box input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         .scanner-loading { display: none; color: #e67e22; font-size: 0.85em; margin-top: 6px; }
 
-        .chart-wrapper { width: 100%; height: 160px; display: flex; justify-content: center; margin-top: 10px; }
+        .chart-wrapper { width: 100%; height: 170px; display: flex; justify-content: center; margin-top: 10px; }
+        .candle-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .btn-group { display: flex; background: var(--border-color); padding: 2px; border-radius: 8px; }
+        .btn-group-item { background: transparent; border: none; padding: 6px 12px; font-family: 'Prompt'; font-size: 0.8em; font-weight: 600; color: var(--text-gray); cursor: pointer; border-radius: 6px; }
+        .btn-group-item.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="top-actions">
-            <h2 style="font-weight: 600;"><i class="fa-solidnot-fa-wallet"></i> AI Wallet Tracker</h2>
+            <h2 style="font-weight: 600;"><i class="fa-solid fa-wallet"></i> AI Wallet Tracker</h2>
             <button class="icon-btn" onclick="toggleSettingsSheet(true)"><i class="fas fa-cog"></i></button>
         </div>
 
@@ -196,14 +210,36 @@
 
         <div class="card ai-panel">
             <div class="ai-header">
-                <i class="fas fa-brain animate-pulse"></i> <span>ที่ปรึกษาการเงิน AI อัจฉริยะ</span>
+                <i class="fas fa-brain"></i> <span>ที่ปรึกษาการเงิน AI อัจฉริยะ</span>
             </div>
             <div class="ai-content" id="aiInsightText">กำลังวิเคราะห์ข้อมูลการเงินของคุณ...</div>
             <div class="ai-alert" id="aiAlertBox"><i class="fas fa-exclamation-triangle"></i> <span id="aiAlertText"></span></div>
         </div>
 
         <div class="card">
-            <h4 style="font-size: 0.95em; color: var(--text-gray);"><i class="fas fa-chart-pie"></i> สัดส่วนค่าใช้จ่ายเดือนนี้</h4>
+            <h4 style="font-size: 0.95em; color: var(--text-gray); margin-bottom: 10px;"><i class="fas fa-comments"></i> ปรึกษาด่วนกับ Gemini Bot</h4>
+            <div class="chat-box" id="chatBox">
+                <div class="msg bot">สวัสดีครับ! ผมคือบอต Gemini ประจำแอปของคุณ มีอะไรอยากให้ช่วยวิเคราะห์แผนการเงิน หรือแนวโน้มกระแสเงินสดถามมาได้เลยครับ! (หากแชทนิ่งโปรดผูก API Key ในหน้าตั้งค่าก่อนนะครับ)</div>
+            </div>
+            <div class="chat-input-group">
+                <input type="text" id="chatInput" placeholder="พิมพ์ถามเรื่องเงิน, วางแผนออมเงิน..." onkeydown="if(event.key==='Enter') sendToGemini()">
+                <button class="icon-btn" onclick="sendToGemini()" style="background: var(--primary-color); color: white; border: none;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="candle-toolbar">
+                <h4 style="font-size: 0.95em; color: var(--text-gray);"><i class="fas fa-chart-bar"></i> สรุปกระแสเงินสดแบบแท่งเทียน</h4>
+                <div class="btn-group">
+                    <button class="btn-group-item active" id="btnWeek" onclick="setCandlePeriod('weekly')">สัปดาห์</button>
+                    <button class="btn-group-item" id="btnMonth" onclick="setCandlePeriod('monthly')">เดือน</button>
+                </div>
+            </div>
+            <div class="chart-wrapper" style="height: 200px;"><canvas id="candleChart"></canvas></div>
+        </div>
+
+        <div class="card">
+            <h4 style="font-size: 0.95em; color: var(--text-gray);"><i class="fas fa-chart-pie"></i> วงล้อสมดุลการใช้เงินเดือนนี้</h4>
             <div class="chart-wrapper"><canvas id="expenseChart"></canvas></div>
         </div>
 
@@ -265,7 +301,7 @@
             </div>
             <div class="form-control">
                 <label>จำนวนเงิน (บาท)</label>
-                <input type="number" id="amount" placeholder="0.00" step="0.01" required />
+                <input type="number" id="amount" placeholder="0.00" step="0.01" inputmode="decimal" pattern="[0-9]*" required />
             </div>
             <button class="btn-main">บันทึกธุรกรรม</button>
         </form>
@@ -279,6 +315,12 @@
         </div>
         
         <div class="form-control">
+            <label><i class="text-primary fas fa-key"></i> Gemini API Key (ดึงแชทถามตอบ)</label>
+            <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." oninput="saveSettings()">
+            <small style="font-size:0.75em; color:var(--text-gray)">รับกุญแจฟรีได้ที่เว็บบราวเซอร์ Google AI Studio</small>
+        </div>
+
+        <div class="form-control">
             <label>โหมดการแสดงผล</label>
             <select id="themeMode" onchange="changeDisplayMode()">
                 <option value="light">☀️ Light Mode (โหมดสว่าง)</option>
@@ -288,12 +330,19 @@
 
         <div class="form-control">
             <label>สีเน้นหลักแอพ (Accent Color)</label>
-            <div class="theme-grid">
+            <div class="theme-flex-wrapper">
                 <div class="theme-dot" style="background:#4e54c8;" onclick="changeAccent('#4e54c8', '#8f94fb', this)"></div>
                 <div class="theme-dot" style="background:#0078d4;" onclick="changeAccent('#0078d4', '#60cdff', this)"></div>
                 <div class="theme-dot" style="background:#107c41;" onclick="changeAccent('#107c41', '#85e0a3', this)"></div>
+                <div class="theme-dot" style="background:#ff69b4;" onclick="changeAccent('#ff69b4', '#ffb6c1', this)"></div>
                 <div class="theme-dot" style="background:#d13438;" onclick="changeAccent('#d13438', '#ff8c8c', this)"></div>
                 <div class="theme-dot" style="background:#8764b8;" onclick="changeAccent('#8764b8', '#c3b1e1', this)"></div>
+                
+                <div class="color-wheel-btn" title="เลือกสีเองอิสระ">
+                    <i class="fas fa-palette"></i>
+                    <input type="color" id="customColorPicker" onchange="handleCustomColor(event)">
+                </div>
+                <span style="font-size: 0.8em; color: var(--text-gray);" id="colorNameLabel"></span>
             </div>
         </div>
 
@@ -302,39 +351,37 @@
             <input type="number" id="budgetLimitInput" placeholder="ใส่จำนวนเงิน เช่น 5000" oninput="saveSettings()">
         </div>
 
-        <button class="btn-main" onclick="toggleSettingsSheet(false)" style="background:#333;">เสร็จสิ้น</button>
+        <div class="form-control" style="margin-top:20px; border-top:1px solid var(--border-color); padding-top:15px;">
+            <label><i class="fas fa-eraser"></i> จัดการข้อมูลธุรกรรม (เลือกลบแค่อันใดอันหนึ่ง)</label>
+            <div class="settings-list" id="settingsTransactionsList"></div>
+        </div>
+
+        <button class="btn-main btn-danger" onclick="clearAllTransactions()"><i class="fas fa-trash-alt"></i> ล้างข้อมูลธุรกรรมทั้งหมดในเครื่อง</button>
+        <button class="btn-main" onclick="toggleSettingsSheet(false)" style="background:#334155; margin-top:10px;">ปิดหน้าต่างตั้งค่า</button>
     </div>
 
     <script>
         const categories = {
-            income: [
-                { name: 'เงินเดือน', icon: '💰' }, { name: 'รายได้เสริม', icon: '💼' }, { name: 'อื่น ๆ', icon: '✨' }
-            ],
-            expense: [
-                { name: 'อาหาร', icon: '🍔' }, { name: 'ช้อปปิ้ง', icon: '🛍️' },
-                { name: 'เดินทาง', icon: '🚗' }, { name: 'ความบันเทิง', icon: '🎬' },
-                { name: 'ค่าน้ำค่าไฟ', icon: '🔌' }, { name: 'อื่น ๆ', icon: '✨' }
-            ]
+            income: [{ name: 'เงินเดือน', icon: '💰' }, { name: 'รายได้เสริม', icon: '💼' }, { name: 'อื่น ๆ', icon: '✨' }],
+            expense: [{ name: 'อาหาร', icon: '🍔' }, { name: 'ช้อปปิ้ง', icon: '🛍️' }, { name: 'เดินทาง', icon: '🚗' }, { name: 'ความบันเทิง', icon: '🎬' }, { name: 'ค่าน้ำค่าไฟ', icon: '🔌' }, { name: 'อื่น ๆ', icon: '✨' }]
         };
 
-        // คีย์เวิร์ดสำหรับ AI จัดหมวดหมู่อัตโนมัติ
         const aiKeywords = {
-            '🍔 อาหาร': ['ข้าว', 'ก๋วยเตี๋ยว', 'น้ำ', 'ขนม', 'ชาบู', 'หมูกระทะ', 'เซเว่น', '7-11', 'kfc', 'mcdonald', 'คาเฟ่'],
-            '🛍️ ช้อปปิ้ง': ['เสื้อ', 'กางเกง', 'รองเท้า', 'shopee', 'lazada', 'แอพส้ม', 'ของเล่น', 'หูฟัง', 'คอม'],
-            '🚗 เดินทาง': ['น้ำมัน', 'รถเมล์', 'bts', 'mrt', 'วิน', 'แท็กซี่', 'grab', 'ซ่อมรถ'],
-            '🎬 ความบันเทิง': ['หนัง', 'netflix', 'spotify', 'เกม', 'เติมเกม', 'คอนเสิร์ต'],
+            '🍔 อาหาร': ['ข้าว', 'ก๋วยเตี๋ยว', 'น้ำ', 'ขนม', 'ชาบู', 'หมูกระทะ', 'เซเว่น', '7-11', 'kfc', 'mcdonald', 'คาเฟ่', 'ชาเขียว', 'ชาไทย', 'ซูชิ'],
+            '🛍️ ช้อปปิ้ง': ['เสื้อ', 'กางเกง', 'รองเท้า', 'shopee', 'lazada', 'แอพส้ม', 'ของเล่น', 'หูฟัง', 'คอม', 'เคสโทรศัพท์'],
+            '🚗 เดินทาง': ['น้ำมัน', 'รถเมล์', 'bts', 'mrt', 'วิน', 'แท็กซี่', 'grab', 'ซ่อมรถ', 'มอเตอร์ไซค์'],
+            '🎬 ความบันเทิง': ['หนัง', 'netflix', 'spotify', 'เกม', 'เติมเกม', 'คอนเสิร์ต', 'valorant', 'roblox'],
             '🔌 ค่าน้ำค่าไฟ': ['ค่าไฟ', 'ค่าน้ำ', 'ค่าเน็ต', 'เน็ตมือถือ', 'ค่าห้อง', 'ค่าหอ']
         };
 
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        let expenseChart = null;
-        let config = JSON.parse(localStorage.getItem('walletConfig')) || { mode: 'light', primary: '#4e54c8', secondary: '#8f94fb', limit: 5000 };
+        let expenseChart = null, candleChart = null;
+        let candlePeriod = 'weekly';
+        let config = JSON.parse(localStorage.getItem('walletConfig')) || { mode: 'light', primary: '#4e54c8', secondary: '#8f94fb', limit: 5000, geminiKey: '' };
 
-        // 🧠 ฟังก์ชัน AI จัดหมวดหมู่อัตโนมัติตามชื่อรายการที่พิมพ์
         function aiAutoCategoryHint() {
             const textValue = document.getElementById('text').value.toLowerCase();
             if(!textValue) return;
-            
             for (let cat in aiKeywords) {
                 if (aiKeywords[cat].some(kw => textValue.includes(kw))) {
                     document.getElementById('category').value = cat;
@@ -343,13 +390,75 @@
             }
         }
 
-        // 🧠 ฟังก์ชันหลัก AI: วิเคราะห์พฤติกรรม, คาดการณ์, แนะนำการออม, แจ้งเตือนใช้เงินเกินตัว
+        // 💬 NEW!! ฟังก์ชันเชื่อมโยงประมวลผลข้อความแชทส่งหาเว็บบอร์ดของ Gemini API
+        async function sendToGemini() {
+            const inputEl = document.getElementById('chatInput');
+            const chatBox = document.getElementById('chatBox');
+            const promptText = inputEl.value.trim();
+            if (!promptText) return;
+
+            // พิมพ์คำถามฝั่ง User ขึ้นจอ
+            appendChatMessage(promptText, 'user');
+            inputEl.value = '';
+
+            // เตรียมข้อมูลแบคกราวนด์ธุรกรรมล่าสุดเพื่อให้ Gemini นำไปวิเคราะห์บริบทแอปได้แม่นยำขึ้น
+            const briefHistory = transactions.slice(-10).map(t => `${t.date.split('T')[0]} | ${t.text}: ฿${t.amount}`).join('\n');
+            const systemContext = `คุณคือที่ปรึกษาด้านการเงินอัจฉริยะ (Gemini Financial Bot) ประจำแอปบันทึกรายรับ-รายจ่าย ตอบคำถามอย่างสั้นกระชับเข้าใจง่าย มีประโยชน์ เป็นมิตร นี่คือประวัติการเงิน 10 รายการล่าสุดในระบบของผู้ใช้ปัจจุบัน:\n${briefHistory || 'ไม่มีประวัติ'}\n\nคำถามจากผู้ใช้คือ: "${promptText}"`;
+
+            // ดึง API Key
+            const apiKey = config.geminiKey || '';
+            if (!apiKey) {
+                setTimeout(() => {
+                    appendChatMessage("⚠️ ไม่พบ Gemini API Key ในระบบกรุณาเปิดหน้ากากตั้งค่า (รูปเกียร์ขวาบน) และนำกุญแจ API Key มาเติมก่อนนะครับ เพื่อเริ่มคุยอัจฉริยะแบบเรียลไทม์!", 'bot');
+                }, 600);
+                return;
+            }
+
+            // แสดงสถานะพิจารณา
+            const loadingId = 'bot-load-' + Date.now();
+            const loadDiv = document.createElement('div');
+            loadDiv.className = 'msg bot';
+            loadDiv.id = loadingId;
+            loadDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Gemini กำลังคิดหาคำตอบให้คุณ...`;
+            chatBox.appendChild(loadDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemContext }] }] })
+                });
+                
+                const resData = await response.json();
+                document.getElementById(loadingId).remove();
+
+                if(resData.candidates && resData.candidates[0].content.parts[0].text) {
+                    let aiReply = resData.candidates[0].content.parts[0].text;
+                    appendChatMessage(aiReply, 'bot');
+                } else {
+                    appendChatMessage("🤖 บอตเข้าใจที่คุณถาม แต่อาจเกิดความขัดข้องของโครงสร้างกุญแจ หรือโควตา API พยายามอีกครั้งนะครับ", 'bot');
+                }
+            } catch (err) {
+                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                appendChatMessage("❌ เชื่อมต่อกับ Google Gemini ล้มเหลว โปรดตรวจสอบสัญญาณเน็ตหรือความถูกต้องของ API Key ครับ", 'bot');
+            }
+        }
+
+        function appendChatMessage(text, sender) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.className = `msg ${sender}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         function runAIEngine() {
             const now = new Date();
             const curMonth = now.getMonth();
             const curYear = now.getFullYear();
 
-            // คัดกรองข้อมูลของเดือนปัจจุบัน
             const monthlyTrans = transactions.filter(t => {
                 const d = new Date(t.date);
                 return d.getMonth() === curMonth && d.getFullYear() === curYear;
@@ -358,7 +467,6 @@
             const income = monthlyTrans.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
             const expense = Math.abs(monthlyTrans.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0));
 
-            // 1. จัดหมวดหมู่ยอดรวมเพื่อหาพฤติกรรมหลัก
             const catSummary = {};
             monthlyTrans.filter(t => t.amount < 0).forEach(t => {
                 catSummary[t.category] = (catSummary[t.category] || 0) + Math.abs(t.amount);
@@ -367,43 +475,125 @@
             let topExpenseCat = "ไม่มี";
             let topExpenseAmt = 0;
             for(let cat in catSummary) {
-                if(catSummary[cat] > topExpenseAmt) {
-                    topExpenseAmt = catSummary[cat];
-                    topExpenseCat = cat;
-                }
+                if(catSummary[cat] > topExpenseAmt) { topExpenseAmt = catSummary[cat]; topExpenseCat = cat; }
             }
 
-            // 2. คำนวณคาดการณ์และคำแนะนำ
             const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
             const currentDay = now.getDate() || 1;
             const avgDailyExpense = expense / currentDay;
-            const predictedExpense = avgDailyExpense * daysInMonth; // คาดการณ์สิ้นเดือน
+            const predictedExpense = avgDailyExpense * daysInMonth;
 
             let insightHTML = `• <b>พฤติกรรมหลัก:</b> เดือนนี้คุณใช้จ่ายไปกับกลุ่ม <b>${topExpenseCat}</b> มากที่สุด (฿${topExpenseAmt.toLocaleString()})<br>`;
-            insightHTML += `• <b>คาดการณ์รายจ่ายสิ้นเดือน:</b> ระบบคำนวณจากค่าเฉลี่ยรายวัน คาดว่าสิ้นเดือนนี้คุณจะมีรายจ่ายรวมประมาณ <b style="color:var(--expense-color)">฿${Math.round(predictedExpense).toLocaleString()}</b><br>`;
+            insightHTML += `• <b>คาดการณ์รายจ่ายสิ้นเดือน:</b> ระบบคาดว่าสิ้นเดือนนี้คุณจะมีรายจ่ายรวมประมาณ <b style="color:var(--expense-color)">฿${Math.round(predictedExpense).toLocaleString()}</b><br>`;
 
             if (income > expense) {
-                const savings = income - expense;
-                insightHTML += `• <b>แนะนำการออม:</b> เยี่ยมมาก! ตอนนี้คุณมีเงินออมเหลืออยู่ ฿${savings.toLocaleString()} แนะนำให้โอนแยกก้อนฝากประจำหรือกองทุนลดหย่อนภาษี 20% ของเงินออมนี้เพื่อเพิ่มความมั่งคั่งครับ`;
+                insightHTML += `• <b>แนะนำการออม:</b> เยี่ยมมาก! มีเงินออมเหลืออยู่ ฿${(income - expense).toLocaleString()} แนะนำแบ่งออมสะสมเพิ่มขึ้นครับ`;
             } else if (expense > 0) {
-                insightHTML += `• <b>แนะนำการออม:</b> รายจ่ายสูงกว่ารายรับ แนะนำให้ลดละสิ่งของฟุ่มเฟือยในหมวด ${topExpenseCat} เพื่อให้บัญชีกลับมาสมดุล`;
+                insightHTML += `• <b>แนะนำการออม:</b> รายจ่ายสูงกว่ารายรับ แนะนำให้ลดละสิ่งของฟุ่มเฟือยในหมวด ${topExpenseCat}`;
             } else {
-                insightHTML += `ยังไม่มีข้อมูลการใช้เงินในเดือนนี้ บันทึกรายการแรกเพื่อเริ่มให้บอตวิเคราะห์ได้เลยครับ`;
+                insightHTML += `ยังไม่มีข้อมูลการใช้เงินในเดือนนี้ บันทึกรายการแรกได้เลยครับ`;
             }
 
             document.getElementById('aiInsightText').innerHTML = insightHTML;
 
-            // 3. แจ้งเตือนใช้เงินเกินตัว (Budget Limit Trigger)
             const alertBox = document.getElementById('aiAlertBox');
             if (config.limit && expense > config.limit) {
-                document.getElementById('aiAlertText').innerText = `ใช้เงินเกินตัว! เดือนนี้ใช้ไป ฿${expense.toLocaleString()} เกินกำหนดวงเงินเตือนภัยที่ตั้งไว้ (฿${config.limit.toLocaleString()}) แล้วนะ! ควบคุมด่วน`;
-                alertBox.style.style.display = 'block';
-            } else {
-                alertBox.style.display = 'none';
-            }
+                document.getElementById('aiAlertText').innerText = `ใช้เงินเกินตัว! เดือนนี้ใช้ไป ฿${expense.toLocaleString()} เกินกำหนดวงเงินเตือนภัยที่ตั้งไว้ (฿${config.limit.toLocaleString()}) แล้วนะ!`;
+                alertBox.style.display = 'block';
+            } else { alertBox.style.display = 'none'; }
         }
 
-        // 🔍 ระบบกรองและรีเซ็ตประวัติย้อนหลัง
+        function setCandlePeriod(period) {
+            candlePeriod = period;
+            document.getElementById('btnWeek').classList.toggle('active', period === 'weekly');
+            document.getElementById('btnMonth').classList.toggle('active', period === 'monthly');
+            renderCandleChart();
+        }
+
+        function renderCandleChart() {
+            const ctx = document.getElementById('candleChart').getContext('2d');
+            if (candleChart) candleChart.destroy();
+            if (transactions.length === 0) {
+                candleChart = new Chart(ctx, { type: 'bar', data: { labels: ['ไม่มีข้อมูล'], datasets: [] } });
+                return;
+            }
+
+            let groups = {};
+            let sortedTrans = [...transactions].sort((a,b) => new Date(a.date) - new Date(b.date));
+            let rollingBalance = 0;
+
+            sortedTrans.forEach(t => {
+                const d = new Date(t.date);
+                let groupKey = '';
+                if (candlePeriod === 'weekly') {
+                    const startOfYear = new Date(d.getFullYear(), 0, 1);
+                    const pastDaysOfYear = (d - startOfYear) / 86400000;
+                    const weekNum = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+                    groupKey = `สัปดาห์ที่ ${weekNum}`;
+                } else {
+                    groupKey = d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
+                }
+
+                if (!groups[groupKey]) {
+                    groups[groupKey] = { open: rollingBalance, high: rollingBalance, low: rollingBalance, close: rollingBalance, transactions: [] };
+                }
+
+                rollingBalance += t.amount;
+                groups[groupKey].transactions.push(t.amount);
+                groups[groupKey].close = rollingBalance;
+
+                if (rollingBalance > groups[groupKey].high) groups[groupKey].high = rollingBalance;
+                if (rollingBalance < groups[groupKey].low) groups[groupKey].low = rollingBalance;
+            });
+
+            const labels = Object.keys(groups);
+            const datasetsData = [];
+            const backgroundColors = [];
+            const borderColors = [];
+
+            labels.forEach(key => {
+                const g = groups[key];
+                datasetsData.push([g.open, g.close]);
+                if (g.close >= g.open) {
+                    backgroundColors.push('rgba(46, 204, 113, 0.7)');
+                    borderColors.push('#2ecc71');
+                } else {
+                    backgroundColors.push('rgba(231, 76, 60, 0.7)');
+                    borderColors.push('#e74c3c');
+                }
+            });
+
+            candleChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'ยอดเงินสะสม', data: datasetsData, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 2, borderRadius: 4, borderSkipped: false }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const g = groups[context.label];
+                                    return [
+                                        `เงินต้นช่วง (Open): ฿${g.open.toLocaleString()}`,
+                                        `จุดสูงสุด (High): ฿${g.high.toLocaleString()}`,
+                                        `จุดต่ำสุด (Low): ฿${g.low.toLocaleString()}`,
+                                        `สิ้นสุดช่วง (Close): ฿${g.close.toLocaleString()}`,
+                                        `ผลลัพธ์รอบ: ${g.close >= g.open ? '🟢 เงินเพิ่มขึ้น' : '🔴 เงินลดลง'}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { ticks: { font: { family: 'Prompt', size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { font: { family: 'Prompt', size: 10 } } } }
+                }
+            });
+        }
+
         function resetFilters() {
             document.getElementById('filterDate').value = '';
             document.getElementById('filterCategory').value = '';
@@ -417,32 +607,22 @@
             const filterDateVal = document.getElementById('filterDate').value;
             const filterCatVal = document.getElementById('filterCategory').value;
 
-            // กรองประวัติตามเงื่อนไข
             let filtered = transactions.filter(t => {
-                let matchDate = true;
-                let matchCat = true;
-
-                if (filterDateVal) {
-                    const tDate = t.date.split('T')[0];
-                    matchDate = (tDate === filterDateVal);
-                }
-                if (filterCatVal) {
-                    matchCat = (t.category && t.category.startsWith(filterCatVal.split(' ')[0]));
-                }
+                let matchDate = true, matchCat = true;
+                if (filterDateVal) matchDate = (t.date.split('T')[0] === filterDateVal);
+                if (filterCatVal) matchCat = (t.category && t.category.startsWith(filterCatVal.split(' ')[0]));
                 return matchDate && matchCat;
             });
 
             filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
 
             if(filtered.length === 0) {
-                container.innerHTML = `<p style="text-align:center; color:var(--text-gray); font-size:0.9em; padding:20px;">❌ ไม่พบรายการประวัติที่ตรงกับเงื่อนไขการค้นหา</p>`;
+                container.innerHTML = `<p style="text-align:center; color:var(--text-gray); font-size:0.9em; padding:20px;">❌ ไม่พบรายการประวัติธุรกรรม</p>`;
                 updateDashboard();
                 return;
             }
 
-            let lastDate = '';
-            let currentUl = null;
-
+            let lastDate = '', currentUl = null;
             filtered.forEach(t => {
                 const d = new Date(t.date);
                 const dateStr = d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -453,7 +633,6 @@
                     header.className = 'date-header';
                     header.innerText = dateStr;
                     container.appendChild(header);
-
                     currentUl = document.createElement('ul');
                     container.appendChild(currentUl);
                     lastDate = dateStr;
@@ -471,77 +650,79 @@
                             <span class="item-time"><i class="far fa-clock"></i> ${timeStr} น. | ${t.category || 'ทั่วไป'}</span>
                         </div>
                     </div>
-                    <div style="display:flex; align-items:center;">
-                        <span class="money ${t.amount > 0 ? 'plus':'minus'}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString('th-TH', {minimumFractionDigits:2})}</span>
-                        <button class="delete-btn" onclick="removeTransaction(${t.id})"><i class="fas fa-trash"></i></button>
-                    </div>
+                    <div><span class="money ${t.amount > 0 ? 'plus':'minus'}">${t.amount > 0 ? '+':''}${t.amount.toLocaleString('th-TH', {minimumFractionDigits:2})}</span></div>
                 `;
                 currentUl.appendChild(li);
             });
 
             updateDashboard();
+            renderSettingsTransactionsList();
         }
 
-        // ⚙️ ระบบตั้งค่า & เปลี่ยนธีมแอพ (Windows 11 Personalization Style)
+        function renderSettingsTransactionsList() {
+            const listContainer = document.getElementById('settingsTransactionsList');
+            if(!listContainer) return;
+            listContainer.innerHTML = '';
+            if(transactions.length === 0) {
+                listContainer.innerHTML = `<p style="font-size:0.8em; color:var(--text-gray); text-align:center; padding:10px;">ไม่มีรายการให้ลบ</p>`;
+                return;
+            }
+            [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+                const d = new Date(t.date);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'settings-list-item';
+                itemDiv.innerHTML = `<span>[${d.getDate()}/${d.getMonth()+1}] ${t.text} (${t.amount > 0 ? '+':''}${t.amount.toLocaleString()})</span><button class="sm-delete-btn" onclick="removeTransaction(${t.id})"><i class="fas fa-trash-alt"></i></button>`;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
         function applyConfig() {
             document.documentElement.setAttribute('data-theme', config.mode);
             document.documentElement.style.setProperty('--primary-color', config.primary);
             document.documentElement.style.setProperty('--secondary-color', config.secondary);
             document.getElementById('themeMode').value = config.mode;
             document.getElementById('budgetLimitInput').value = config.limit || '';
+            document.getElementById('geminiApiKeyInput').value = config.geminiKey || '';
+            document.getElementById('colorNameLabel').innerText = `สีปัจจุบัน: ${config.primary}`;
         }
 
-        function changeDisplayMode() {
-            config.mode = document.getElementById('themeMode').value;
-            saveSettings();
-        }
-
-        function changeAccent(pri, sec, element) {
-            config.primary = pri;
-            config.secondary = sec;
-            document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
-            if(element) element.classList.add('active');
-            saveSettings();
-        }
+        function changeDisplayMode() { config.mode = document.getElementById('themeMode').value; saveSettings(); }
+        function changeAccent(pri, sec, element) { config.primary = pri; config.secondary = sec; document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active')); if(element) element.classList.add('active'); saveSettings(); }
+        function handleCustomColor(event) { changeAccent(event.target.value, event.target.value + "b3", null); }
 
         function saveSettings() {
             config.limit = +document.getElementById('budgetLimitInput').value || 0;
+            config.geminiKey = document.getElementById('geminiApiKeyInput').value.trim();
             localStorage.setItem('walletConfig', JSON.stringify(config));
             applyConfig();
             runAIEngine();
         }
 
-        // ⚙️ ส่วนควบคุม UI การเปิด/ปิด Pop-up หน้าต่างสไลด์
         function toggleForm(open) {
             document.getElementById('formOverlay').style.display = open ? 'block' : 'none';
             if(open) {
                 document.getElementById('formSheet').classList.add('open');
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 document.getElementById('date').value = now.toISOString().slice(0, 16);
             } else { document.getElementById('formSheet').classList.remove('open'); }
         }
 
         function toggleSettingsSheet(open) {
             document.getElementById('settingsOverlay').style.display = open ? 'block' : 'none';
-            if(open) { document.getElementById('settingsSheet').classList.add('open'); applyConfig(); }
+            if(open) { document.getElementById('settingsSheet').classList.add('open'); applyConfig(); renderSettingsTransactionsList(); }
             else { document.getElementById('settingsSheet').classList.remove('open'); }
         }
 
         function updateCategories() {
             const type = document.getElementById('type-income').checked ? 'income' : 'expense';
-            const catSelect = document.getElementById('category');
-            catSelect.innerHTML = categories[type].map(c => `<option value="${c.icon} ${c.name}">${c.icon} ${c.name}</option>`).join('');
+            document.getElementById('category').innerHTML = categories[type].map(c => `<option value="${c.icon} ${c.name}">${c.icon} ${c.name}</option>`).join('');
         }
 
-        // 🤖 ระบบแสกน OCR สลิปธนาคาร
         async function scanSlip(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            const file = event.target.files[0]; if (!file) return;
             const loadingDiv = document.getElementById('scanLoading');
             const progressSpan = document.getElementById('scanProgress');
             loadingDiv.style.display = 'block';
-            
             try {
                 const worker = await Tesseract.createWorker('tha+eng');
                 worker.logger = m => { if(m.status==='recognizing text') progressSpan.innerText = Math.round(m.progress*100)+'%'; };
@@ -550,29 +731,18 @@
                 loadingDiv.style.display = 'none';
 
                 let amount = null;
-                const lines = text.split('\n');
-                for (let line of lines) {
+                for (let line of text.split('\n')) {
                     if (/บาท|baht|จำนวน|ยอด|amount/i.test(line)) {
                         const match = line.replace(/,/g, '').match(/\d+\.\d{2}/);
                         if (match) { amount = parseFloat(match[0]); break; }
                     }
                 }
-
-                document.getElementById('type-expense').checked = true;
-                updateCategories();
+                document.getElementById('type-expense').checked = true; updateCategories();
                 document.getElementById('category').value = '🍔 อาหาร';
                 document.getElementById('text').value = 'สแกนอัตโนมัติจากสลิปโอนเงิน';
-                
-                if (amount) {
-                    document.getElementById('amount').value = amount;
-                    alert(`🤖 AI ดึงข้อมูลยอดสำเร็จ: ฿${amount} บาท`);
-                } else {
-                    alert('🤖 AI อ่านข้อมูลสลิปเรียบร้อยแล้ว แต่ไม่พบจำนวนเงินที่ชัดเจน รบกวนช่วยพิมพ์ระบุยอดเงินอีกทีนะครับ');
-                }
-            } catch (err) {
-                loadingDiv.style.display = 'none';
-                alert('เกิดข้อผิดพลาดในการรันโมดูลสแกนรูปภาพ');
-            }
+                if (amount) { document.getElementById('amount').value = amount; alert(`🤖 AI ดึงข้อมูลยอดสำเร็จ: ฿${amount} บาท`); }
+                else { alert('🤖 AI ไม่พบจำนวนเงินที่ชัดเจน รบกวนระบุยอดเงินเองอีกครั้งครับ'); }
+            } catch (err) { loadingDiv.style.display = 'none'; alert('เกิดข้อผิดพลาดกับโมดูลสแกนรูปภาพ'); }
         }
 
         function updateDashboard() {
@@ -586,35 +756,26 @@
             document.getElementById('money-minus').innerText = `-฿${expense.toLocaleString('th-TH', {minimumFractionDigits:2})}`;
             document.getElementById('current-month-text').innerText = `ประจำกาลรอบ: ${new Date().toLocaleDateString('th-TH', {month:'long', year:'numeric'})}`;
 
-            updateChart();
+            updateChart(income, expense);
+            renderCandleChart();
         }
 
-        function updateChart() {
-            const curMonth = new Date().getMonth();
-            const curYear = new Date().getFullYear();
-            const monthlyExpenses = transactions.filter(t => {
-                const d = new Date(t.date);
-                return t.amount < 0 && d.getMonth() === curMonth && d.getFullYear() === curYear;
-            });
-
-            const summary = {};
-            monthlyExpenses.forEach(t => { summary[t.category] = (summary[t.category] || 0) + Math.abs(t.amount); });
-
-            const labels = Object.keys(summary);
-            const data = Object.values(summary);
+        function updateChart(income, expense) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
-
             if (expenseChart) expenseChart.destroy();
-
-            if(labels.length === 0) {
-                expenseChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['ไม่มีรายจ่าย'], datasets: [{ data: [100], backgroundColor: ['#eee'] }] }, options: { plugins: { legend: { display: false } }, cutout: '75%' } });
+            if (income === 0 && expense === 0) {
+                expenseChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['ยังไม่มีข้อมูล'], datasets: [{ data: [100], backgroundColor: ['#cbd5e1'] }] }, options: { plugins: { legend: { display: false } }, cutout: '75%' } });
                 return;
             }
+            let remainingSafeIncome = income - expense;
+            let datasetData = remainingSafeIncome > 0 ? [remainingSafeIncome, expense] : [expense];
+            let datasetColors = remainingSafeIncome > 0 ? ['#2ecc71', '#e74c3c'] : ['#e74c3c'];
+            let datasetLabels = remainingSafeIncome > 0 ? ['เงินออมคงเหลือ', 'รายจ่ายรวม'] : ['ใช้จ่ายเกินรายรับรวมแล้ว!'];
 
             expenseChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'] }] },
-                options: { plugins: { legend: { display: false } }, cutout: '70%' }
+                data: { labels: datasetLabels, datasets: [{ data: datasetData, backgroundColor: datasetColors, borderWidth: 2 }] },
+                options: { plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { family: 'Prompt', size: 11 } } } }, cutout: '70%' }
             });
         }
 
@@ -624,38 +785,23 @@
             let amt = +document.getElementById('amount').value;
             if(!isIncome) amt = -Math.abs(amt);
 
-            const transaction = {
-                id: Math.floor(Math.random() * 100000000),
-                text: document.getElementById('text').value,
-                category: document.getElementById('category').value,
-                amount: amt,
-                date: document.getElementById('date').value
-            };
-
-            transactions.push(transaction);
+            transactions.push({ id: Math.floor(Math.random() * 100000000), text: document.getElementById('text').value, category: document.getElementById('category').value, amount: amt, date: document.getElementById('date').value });
             localStorage.setItem('transactions', JSON.stringify(transactions));
-            
-            document.getElementById('text').value = '';
-            document.getElementById('amount').value = '';
-            toggleForm(false);
-            renderList();
-            runAIEngine();
+            document.getElementById('text').value = ''; document.getElementById('amount').value = '';
+            toggleForm(false); renderList(); runAIEngine();
         });
 
         function removeTransaction(id) {
-            if(confirm('คุณแน่ใจไหมว่าต้องการลบรายการนี้?')) {
-                transactions = transactions.filter(t => t.id !== id);
-                localStorage.setItem('transactions', JSON.stringify(transactions));
-                renderList();
-                runAIEngine();
+            if(confirm('คุณแน่ใจไหมว่าต้องการลบรายการธุรกรรมชิ้นนี้?')) { transactions = transactions.filter(t => t.id !== id); localStorage.setItem('transactions', JSON.stringify(transactions)); renderList(); runAIEngine(); }
+        }
+
+        function clearAllTransactions() {
+            if(confirm("🚨 ลบรายการธุรกรรมทั้งหมดในเครื่องใช่หรือไม่?") && confirm("🔄 ยืนยันรอบสุดท้าย ข้อมูลจะหายไปถาวร?")) {
+                transactions = []; localStorage.removeItem('transactions'); renderList(); runAIEngine(); toggleSettingsSheet(false);
             }
         }
 
-        // เริ่มต้นการรันระบบเมื่อโหลดเสร็จ
-        updateCategories();
-        applyConfig();
-        renderList();
-        runAIEngine();
+        updateCategories(); applyConfig(); renderList(); runAIEngine();
     </script>
 </body>
 </html>
