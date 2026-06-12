@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บันทึกรายรับ-รายจ่าย AI อัจฉริยะ V.12</title>
+    <title>บันทึกรายรับ-รายจ่าย AI อัจฉริยะ V.13</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="MoneyTracker">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png">
+    <link class="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -149,6 +149,14 @@
         .api-status-badge.status-success { background: #d1fae5; color: #065f46; }
         .api-status-badge.status-fail { background: #fee2e2; color: #991b1b; }
 
+        /* API Helper Guide */
+        .api-guide-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 0.8em; color: var(--text-main); line-height: 1.5; }
+        [data-theme="dark"] .api-guide-box { background: #1e293b; border-dash-color: #475569; }
+        .api-guide-box ol { margin-left: 18px; margin-top: 4px; }
+        .link-btn-sm { display: inline-flex; align-items: center; gap: 5px; background: #e0f2fe; color: #0369a1; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.95em; font-weight: 600; text-decoration: none; margin-top: 6px; cursor: pointer; transition: 0.2s; font-family: 'Prompt'; }
+        .link-btn-sm:hover { background: #bae6fd; }
+        [data-theme="dark"] .link-btn-sm { background: #0c4a6e; color: #7dd3fc; }
+
         /* 🎨 Theme Options */
         .theme-flex-wrapper { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
         .theme-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; position: relative; }
@@ -188,7 +196,9 @@
         .btn-group-item { background: transparent; border: none; padding: 6px 12px; font-family: 'Prompt'; font-size: 0.8em; font-weight: 600; color: var(--text-gray); cursor: pointer; border-radius: 6px; }
         .btn-group-item.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
         
-        .api-input-container { display: flex; gap: 8px; align-items: center; }
+        .api-input-container { display: flex; gap: 8px; align-items: center; position: relative; width: 100%; }
+        .api-toggle-pwd { position: absolute; right: 105px; color: var(--text-gray); cursor: pointer; padding: 5px; font-size: 0.9em; z-index: 10; }
+        .api-input-container input { padding-right: 35px; }
     </style>
 </head>
 <body>
@@ -323,9 +333,23 @@
         </div>
         
         <div class="form-control">
-            <label><i class="text-primary fas fa-key"></i> Gemini API Key</label>
+            <label><i class="text-primary fas fa-key"></i> ตั้งค่าเชื่อมต่อ Gemini API Key</label>
+            
+            <div class="api-guide-box">
+                <b>💡 วิธีการรับ API Key ฟรี (ใน 1 นาที):</b>
+                <ol>
+                    <li>กดปุ่มเปิดหน้าต่างรับคีย์สีฟ้าด้านล่างเพื่อไปยังหน้าเว็บ</li>
+                    <li>เข้าสู่ระบบด้วย Gmail แล้วกดปุ่ม <b>"Get API key"</b></li>
+                    <li>เลือกโปรเจกต์แล้วกด <b>Create API key</b> จากนั้น Copy รหัสมาวางในช่องได้เลยครับ!</li>
+                </ol>
+                <a href="https://aistudio.google.com/" target="_blank" class="link-btn-sm">
+                    <i class="fas fa-external-link-alt"></i> เปิดหน้าต่างรับ API Key (Google AI Studio)
+                </a>
+            </div>
+
             <div class="api-input-container">
-                <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." style="flex: 1;">
+                <input type="password" id="geminiApiKeyInput" placeholder="รหัสคีย์ขึ้นต้นด้วย AIzaSy...">
+                <span class="api-toggle-pwd" onclick="toggleApiKeyVisibility()"><i class="fas fa-eye" id="pwdEyeIcon"></i></span>
                 <button type="button" class="btn-secondary" onclick="verifyAndSaveAPIKey()">ยืนยันคีย์</button>
             </div>
             <div id="apiStatusBadge" class="api-status-badge status-none">
@@ -403,7 +427,20 @@
             }
         }
 
-        // ระบบตรวจสอบและยืนยัน API Key แบบชัวร์ๆ
+        // ระบบสลับการมองเห็น/ซ่อนรหัสผ่าน API Key
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('geminiApiKeyInput');
+            const icon = document.getElementById('pwdEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // ตรวจสอบและยืนยัน API Key 
         async function verifyAndSaveAPIKey() {
             const inputKey = document.getElementById('geminiApiKeyInput').value.trim();
             const badge = document.getElementById('apiStatusBadge');
@@ -421,7 +458,6 @@
             badge.innerHTML = `<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบคีย์กับ Google...`;
 
             try {
-                // ทดสอบยิง API คีย์ด้วยคำถามสั้นๆ เพื่อทดสอบว่าใช้งานได้จริงหรือไม่
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${inputKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -435,7 +471,7 @@
                     badge.innerHTML = `<i class="fas fa-check-circle"></i> ใช้ได้ (สถานะเขียว)`;
                     config.geminiKey = inputKey;
                     config.apiVerifiedStatus = 'success';
-                    alert("✅ ยืนยัน API Key สำเร็จ! บอตพร้อมทำงานแล้วครับ");
+                    alert("✅ ยืนยัน API Key สำเร็จ! บอตพร้อมทำงานร่วมกับคุณแล้วครับ");
                 } else {
                     throw new Error("Invalid Key");
                 }
@@ -443,7 +479,7 @@
                 badge.className = "api-status-badge status-fail";
                 badge.innerHTML = `<i class="fas fa-times-circle"></i> ใช้ไม่ได้ (สถานะแดง)`;
                 config.apiVerifiedStatus = 'fail';
-                alert("❌ API Key ไม่ถูกต้อง หรือโควตาหมด โปรดเช็คตัวอักษรใหม่อีกครั้งครับ");
+                alert("❌ API Key ไม่ถูกต้อง หรือโควตาการใช้งานในคีย์หมด โปรดคัดลอกใหม่อีกครั้งครับ");
             }
             localStorage.setItem('walletConfig', JSON.stringify(config));
         }
@@ -463,7 +499,7 @@
             }
         }
 
-        // 💬 แก้ไขระบบส่งแชทหา Gemini ให้รอบรับ Payload ตัวใหม่ ป้องกันบอตเอ๋อ
+        // ส่งข้อความหา Gemini
         async function sendToGemini() {
             const inputEl = document.getElementById('chatInput');
             const chatBox = document.getElementById('chatBox');
@@ -474,14 +510,12 @@
             inputEl.value = '';
 
             const briefHistory = transactions.slice(-10).map(t => `${t.date.split('T')[0]} | ${t.text}: ฿${t.amount}`).join('\n');
-            
-            // ปรับ Context ป้องกันคำตอบหลุดขอบและทำให้กระชับ
             const systemContext = `คุณคือที่ปรึกษาด้านการเงินส่วนบุคคลอัจฉริยะ ตอบคำถามผู้ใช้เป็นภาษาไทยอย่างกระชับและเป็นมิตร นี่คือประวัติการเงินล่าสุด:\n${briefHistory || 'ไม่มีประวัติ'}\n\nคำถาม: "${promptText}"`;
 
             const apiKey = config.geminiKey || '';
             if (!apiKey) {
                 setTimeout(() => {
-                    appendChatMessage("⚠️ ไม่พบ Gemini API Key ในระบบ กรุณาเข้าหน้าตั้งค่า (รูปเกียร์) เพื่อผูกคีย์และกดยืนยันให้เป็นสถานะเขียวก่อนนะครับ!", 'bot');
+                    appendChatMessage("⚠️ ไม่พบ Gemini API Key ในระบบ กรุณาเข้าหน้าตั้งค่า (รูปเกียร์) เพื่อดูคำแนะนำวิธีการเอาคีย์และกดลิ้งก์รับคีย์มาวางได้เลยครับ!", 'bot');
                 }, 400);
                 return;
             }
@@ -495,13 +529,10 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // ปรับเปลี่ยน Endpoint และโครงสร้างข้อมูล Payload ให้ปลอดภัยและถูกต้องที่สุดตามกฎ API
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemContext }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemContext }] }] })
                 });
                 
                 const resData = await response.json();
@@ -586,7 +617,6 @@
             renderBarChart();
         }
 
-        // 📊 เปลี่ยนเป็นกราฟแท่งเขียวแดงธรรมดา ดูและเข้าใจง่ายขึ้นแบบ 100%
         function renderBarChart() {
             const ctx = document.getElementById('barChart').getContext('2d');
             if (barChart) barChart.destroy();
@@ -610,15 +640,9 @@
                     groupKey = d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
                 }
 
-                if (!groups[groupKey]) {
-                    groups[groupKey] = { income: 0, expense: 0 };
-                }
-
-                if (t.amount > 0) {
-                    groups[groupKey].income += t.amount;
-                } else {
-                    groups[groupKey].expense += Math.abs(t.amount);
-                }
+                if (!groups[groupKey]) { groups[groupKey] = { income: 0, expense: 0 }; }
+                if (t.amount > 0) { groups[groupKey].income += t.amount; } 
+                else { groups[groupKey].expense += Math.abs(t.amount); }
             });
 
             const labels = Object.keys(groups);
@@ -637,9 +661,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, labels: { font: { family: 'Prompt', size: 10 } } }
-                    },
+                    plugins: { legend: { display: true, labels: { font: { family: 'Prompt', size: 10 } } } },
                     scales: { 
                         y: { ticks: { font: { family: 'Prompt', size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }, 
                         x: { ticks: { font: { family: 'Prompt', size: 10 } } } 
@@ -818,7 +840,6 @@
             renderBarChart();
         }
 
-        // 🍩 กราฟวงกลม: เอาเส้นขอบสีขาวออก (borderWidth: 0) เรียบร้อยตามสั่งครับ
         function updateChart(income, expense) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             if (expenseChart) expenseChart.destroy();
